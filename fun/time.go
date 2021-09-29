@@ -23,17 +23,17 @@ func StrTimestamp(stringTime string) int {
 	}
 	return unixTime
 }
-func StrTime(stringTime string) int {
-	var unixTime int
+func StrTime(stringTime string) (time.Time, error) {
+	var theTime time.Time
 	loc, err := time.LoadLocation(TimeLacal)
 	if err != nil {
-		return 0
+		return time.Time{}, err
 	}
-	theTime, err := time.ParseInLocation("2006-01-02 15:04:05", stringTime, loc)
-	if err == nil {
-		unixTime = int(theTime.Unix())
+	theTime, err = time.ParseInLocation("2006-01-02 15:04:05", stringTime, loc)
+	if err != nil {
+		return time.Time{}, err
 	}
-	return unixTime
+	return theTime, nil
 }
 func LocalTimeStr(rowValue string, utc string) string {
 	sqlLoc, _ := time.LoadLocation(utc)
