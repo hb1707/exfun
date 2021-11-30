@@ -23,13 +23,17 @@ func StrTimestamp(stringTime string) int {
 	}
 	return unixTime
 }
-func StrTime(stringTime string) (time.Time, error) {
+func StrTime(stringTime string, layout ...string) (time.Time, error) {
 	var theTime time.Time
 	loc, err := time.LoadLocation(TimeLacal)
 	if err != nil {
 		return time.Time{}, err
 	}
-	theTime, err = time.ParseInLocation("2006-01-02 15:04:05", stringTime, loc)
+	layoutStr := "2006-01-02 15:04:05"
+	if len(layout) > 0 {
+		layoutStr = layout[0]
+	}
+	theTime, err = time.ParseInLocation(layoutStr, stringTime, loc)
 	if err != nil {
 		return time.Time{}, err
 	}
