@@ -7,8 +7,12 @@ import (
 
 var TimeLacal = "Asia/Shanghai"
 
-func TimestampStr(dateline int) string {
-	return time.Unix(int64(dateline), 0).Format("2006-01-02")
+func TimestampStr(dateline int, format ...string) string {
+	var formatStr = "2006-01-02"
+	if len(format) > 0 {
+		formatStr = format[0]
+	}
+	return time.Unix(int64(dateline), 0).Format(formatStr)
 }
 
 func StrTimestamp(stringTime string) int {
@@ -84,4 +88,14 @@ func TimeSub(t1, t2 time.Time) (int, int) {
 		}
 	}
 
+}
+
+//时间转数字，周日=7
+func DateToWeek(t time.Time) int {
+	var week = int(t.Weekday())
+	if week == 0 {
+		return 7
+	} else {
+		return week
+	}
 }
