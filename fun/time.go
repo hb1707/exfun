@@ -7,12 +7,13 @@ import (
 
 var TimeLacal = "Asia/Shanghai"
 
-func TimestampStr(dateline int, format ...string) string {
+func TimestampStr(dateline int64, format ...string) string {
 	var formatStr = "2006-01-02"
 	if len(format) > 0 {
 		formatStr = format[0]
 	}
-	return time.Unix(int64(dateline), 0).Format(formatStr)
+	offset := int64(-8 * 60 * 60)
+	return time.Unix(dateline+offset, 0).Format(formatStr)
 }
 
 func StrTimestamp(stringTime string) int {
