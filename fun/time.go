@@ -15,7 +15,19 @@ func TimestampStr(dateline int64, format ...string) string {
 	offset := int64(-8 * 60 * 60)
 	return time.Unix(dateline+offset, 0).Format(formatStr)
 }
-
+func TimestampTime(dateline int64, fix bool, offset ...int64) time.Time {
+	var _offset int64 = 0
+	if len(offset) > 0 {
+		_offset = offset[0]
+	}
+	var t time.Time
+	if fix {
+		t, _ = StrTime(time.Unix(dateline+_offset, 0).Format("2006-01-02 15:04:05"), "2006-01-02 15:04:05")
+	} else {
+		t = time.Unix(dateline+_offset, 0)
+	}
+	return t
+}
 func StrTimestamp(stringTime string) int {
 	var unixTime int
 	loc, err := time.LoadLocation(TimeLacal)
