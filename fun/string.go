@@ -166,9 +166,12 @@ func PregReplace(arr []string, repl interface{}, src string) string {
 	return src
 }
 
-func HideString(str string) string {
+func HideString(str string, starNum int) string {
 	hLen := len(str)
 	min := int(math.Floor(float64(hLen) / 3))
+	if starNum > 0 {
+		min = starNum
+	}
 	star := hLen - (min * 2)
 	re, _ := regexp.Compile(fmt.Sprintf("(.{%v}?)(.{%v}?)(.+?)", min, star))
 	newStr := re.ReplaceAllString(str, "$1****$3")

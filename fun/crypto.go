@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"log"
 	"math/rand"
+	"net/url"
 	"strings"
 	"time"
 	"unsafe"
@@ -24,6 +25,22 @@ func MD5(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+//urlencode
+func UrlEncode(uDec string) string {
+	uEnc := url.QueryEscape(uDec)
+	return uEnc
+}
+
+//urldecode
+func UrlDecode(uEnc string) string {
+	uDec, err := url.QueryUnescape(uEnc)
+	if err != nil {
+		return ""
+	} else {
+		return uDec
+	}
 }
 
 //base64_encode
@@ -55,14 +72,14 @@ func Base64Decode(sEnc string, security bool) string {
 
 }
 
-//urlencode
-func UrlEncode(uDec string) string {
+//Base64urlencode
+func Base64UrlEncode(uDec string) string {
 	uEnc := base64.URLEncoding.EncodeToString([]byte(uDec))
 	return uEnc
 }
 
-//urldecode
-func UrlDecode(uEnc string) string {
+//Base64urldecode
+func Base64UrlDecode(uEnc string) string {
 	uDec, err := base64.URLEncoding.DecodeString(uEnc)
 	if err != nil {
 		return ""
@@ -71,14 +88,14 @@ func UrlDecode(uEnc string) string {
 	}
 }
 
-//rawurlencode
-func RawUrlEncode(str string) string {
-	return strings.Replace(UrlEncode(str), "+", "%20", -1)
+//urlencode处理加号
+func Base64UrlEncodePlus(str string) string {
+	return strings.Replace(Base64UrlEncode(str), "+", "%20", -1)
 }
 
-//rawurldecode
-func RawUrlDecode(str string) string {
-	return UrlDecode(strings.Replace(str, "%20", "+", -1))
+//urldecode处理加号
+func Base64UrlDecodePlus(str string) string {
+	return Base64UrlDecode(strings.Replace(str, "%20", "+", -1))
 }
 
 //字符串逆序
@@ -100,6 +117,7 @@ const (
 )
 
 //https://www.flysnow.org/2019/09/30/how-to-generate-a-random-string-of-a-fixed-length-in-go.html
+//生成随机字母字符串
 func RandString(n int) string {
 	var b = make([]byte, n)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!

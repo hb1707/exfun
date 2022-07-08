@@ -19,7 +19,14 @@ func InSliceInt(value int, slice []int) bool {
 	}
 	return false
 }
-
+func InSliceUint(value uint, slice []uint) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
 func InSliceString(value string, slice []string) bool {
 	for _, v := range slice {
 		if v == value {
