@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//清除代码
+// ClearTags 清除代码
 func ClearTags(str string) string {
 	str = StripTags(str)
 	//去除换行及其他特殊字符
@@ -17,7 +17,13 @@ func ClearTags(str string) string {
 	return str
 }
 
-//strip_tags
+// IsChineseAndEnglish 判断是否只有中英文和_
+func IsChineseAndEnglish(str string) bool {
+	matched, _ := regexp.MatchString("^[_0-9a-zA-Z\u4e00-\u9fa5]+$", str)
+	return matched
+}
+
+// StripTags strip_tags
 func StripTags(str string) string {
 	//将HTML标签全转换成小写
 	re, _ := regexp.Compile(`\<[\S\s]+?\>`)
@@ -167,7 +173,7 @@ func PregReplace(arr []string, repl interface{}, src string) string {
 }
 
 func HideString(str string, starNum int) string {
-	hLen := len(str)
+	hLen := len([]rune(str))
 	min := int(math.Floor(float64(hLen) / 3))
 	if starNum > 0 {
 		min = starNum
@@ -176,4 +182,27 @@ func HideString(str string, starNum int) string {
 	re, _ := regexp.Compile(fmt.Sprintf("(.{%v}?)(.{%v}?)(.+?)", min, star))
 	newStr := re.ReplaceAllString(str, "$1****$3")
 	return newStr
+}
+
+//ChunkSplit 字符串间隔插入字符
+func ChunkSplit(body string, chunklen uint, end string) string {
+	if end == "" {
+		end = "\r\n"
+	}
+	runes, erunes := []rune(body), []rune(end)
+	l := uint(len(runes))
+	if l <= 1 || l < chunklen {
+		return body + end
+	}
+	ns := make([]rune, 0, len(runes)+len(erunes))
+	var i uint
+	for i = 0; i < l; i += chunklen {
+		if i+chunklen > l {
+			ns = append(ns, runes[i:]...)
+		} else {
+			ns = append(ns, runes[i:i+chunklen]...)
+		}
+		ns = append(ns, erunes...)
+	}
+	return string(ns)
 }

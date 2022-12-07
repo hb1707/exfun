@@ -10,3 +10,8 @@ func Round(f float64, n int) float64 {
 	inst, _ := strconv.ParseFloat(floatStr, 64)
 	return inst
 }
+
+//值是否存在
+func IntChecked(selectInt int, sumInt int) bool {
+	return selectInt&sumInt == selectInt
+}

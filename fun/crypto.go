@@ -27,19 +27,35 @@ func MD5(text string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-//urlencode
+//UrlEncode W3C
 func UrlEncode(uDec string) string {
 	uEnc := url.QueryEscape(uDec)
 	return uEnc
 }
 
-//urldecode
+//UrlDecode W3C
 func UrlDecode(uEnc string) string {
 	uDec, err := url.QueryUnescape(uEnc)
 	if err != nil {
 		return ""
 	} else {
 		return uDec
+	}
+}
+
+//UrlEncodePlus //RFC 2396
+func UrlEncodePlus(uDec string) string { //RFC 2396
+	uEnc := url.QueryEscape(uDec)
+	return strings.Replace(uEnc, "+", "%20", -1)
+}
+
+//UrlDecodePlus //RFC 2396
+func UrlDecodePlus(uEnc string) string { //RFC 2396
+	uDec, err := url.QueryUnescape(uEnc)
+	if err != nil {
+		return ""
+	} else {
+		return strings.Replace(uDec, "%20", "+", -1)
 	}
 }
 
@@ -134,4 +150,25 @@ func RandString(n int) string {
 	}
 
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+//可逆加密
+func Encrypt(text string, key string) []byte {
+	var result string
+	text = StrReverse(Base64Encode(text, true))
+	for i := 0; i < len(text); i++ {
+		result += string(text[i] ^ key[i%len(key)])
+	}
+	return []byte(result)
+}
+
+//可逆解密
+func Decrypt(textByte []byte, key string) string {
+	text := string(textByte)
+	var result string
+	for i := 0; i < len(text); i++ {
+		result += string(text[i] ^ key[i%len(key)])
+	}
+	result = Base64Decode(StrReverse(result), true)
+	return result
 }

@@ -103,7 +103,7 @@ func TimeSub(t1, t2 time.Time) (int, int) {
 
 }
 
-//时间转数字，周日=7
+//DateToWeek 时间转数字，周日=7
 func DateToWeek(t time.Time) int {
 	var week = int(t.Weekday())
 	if week == 0 {
@@ -111,4 +111,13 @@ func DateToWeek(t time.Time) int {
 	} else {
 		return week
 	}
+}
+
+//BirthdayToAge 根据出生年月计算年龄
+func BirthdayToAge(birthday time.Time) int {
+	var ageNow = int(time.Now().Year() - birthday.Year())
+	if time.Now().Month() < birthday.Month() {
+		ageNow--
+	}
+	return ageNow
 }

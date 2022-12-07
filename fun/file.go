@@ -117,3 +117,23 @@ func FileExists(path string) bool {
 	}
 	return true
 }
+
+//遍历文件夹和文件
+func ReadDir(path string, pre string) ([]string, []string) {
+	var pathList = make([]string, 0)
+	var nameList = make([]string, 0)
+	files, _ := os.ReadDir(path)
+	for _, f := range files {
+		if f.IsDir() {
+			pathTemp, nameTemp := ReadDir(fmt.Sprintf("%s%c%s", path, os.PathSeparator, f.Name()), fmt.Sprintf("%s/%s", pre, f.Name()))
+			pathList = append(pathList, pathTemp...)
+			nameList = append(nameList, nameTemp...)
+		} else {
+			pathList = append(pathList, fmt.Sprintf("%s%c%s", path, os.PathSeparator, f.Name()))
+			nameList = append(nameList, fmt.Sprintf("%s/%s", pre, f.Name()))
+		}
+		//log.Println(f.Name())
+	}
+	return pathList, nameList
+
+}

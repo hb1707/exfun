@@ -14,7 +14,8 @@ const AccessToken = "Access-Token"
 const ApplicationJson = "application/json"
 const ApplicationFile = "multipart/form-data"
 const ApplicationXml = "application/xml;charset=utf-8"
-const ApplicationForm = "application/x-www-form-urlencoded"
+const ApplicationForm = "application/x-www-form-urlencoded;charset=utf-8"
+const ApplicationOctetStream = "application/octet-stream;charset=UTF-8"
 const TlsTimeout = time.Duration(20 * time.Second)
 const HttpTimeout = time.Duration(35 * time.Second)
 
