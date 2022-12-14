@@ -203,11 +203,12 @@ func AesDecrypt(crypto, key string) string {
 	}
 	blockSize := block.BlockSize()
 	blockMode := cipher.NewCBCDecrypter(block, k[:blockSize])
-	origData := make([]byte, len(crypto))
+	origData := make([]byte, len(cryptoByte))
 	blockMode.CryptBlocks(origData, cryptoByte)
 	origData = PKCS5UnPadding(origData)
 	return string(origData)
 }
+
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
