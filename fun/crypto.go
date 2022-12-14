@@ -1,6 +1,9 @@
 package fun
 
 import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
@@ -171,4 +174,47 @@ func Decrypt(textByte []byte, key string) string {
 	}
 	result = Base64Decode(StrReverse(result), true)
 	return result
+}
+
+//AesEncrypt AES加密
+func AesEncrypt(orig, key string) string {
+	origData := []byte(orig)
+	k := []byte(key)
+
+	block, err := aes.NewCipher(k)
+	if err != nil {
+		return ""
+	}
+	blockSize := block.BlockSize()
+	origData = PKCS5Padding(origData, blockSize)
+	blockMode := cipher.NewCBCEncrypter(block, k[:blockSize])
+	crypted := make([]byte, len(origData))
+	blockMode.CryptBlocks(crypted, origData)
+	return base64.StdEncoding.EncodeToString(crypted)
+}
+
+//AesDecrypt AES解密
+func AesDecrypt(crypto, key string) string {
+	cryptoByte, _ := base64.StdEncoding.DecodeString(crypto)
+	k := []byte(key)
+	block, err := aes.NewCipher(k)
+	if err != nil {
+		return ""
+	}
+	blockSize := block.BlockSize()
+	blockMode := cipher.NewCBCDecrypter(block, k[:blockSize])
+	origData := make([]byte, len(crypto))
+	blockMode.CryptBlocks(origData, cryptoByte)
+	origData = PKCS5UnPadding(origData)
+	return string(origData)
+}
+func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
+}
+func PKCS5UnPadding(origData []byte) []byte {
+	length := len(origData)
+	unpadding := int(origData[length-1])
+	return origData[:(length - unpadding)]
 }
