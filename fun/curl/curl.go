@@ -3,6 +3,7 @@ package curl
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -44,7 +45,7 @@ func (c *Config) SetHeader(k, v string) {
 func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, error) {
 	var data = url.Values{}
 	for k, v := range param {
-		data.Add(k, v)
+		data.Add(k, fmt.Sprintf("%v", v))
 	}
 	reqBody := data.Encode()
 	client := &http.Client{}
@@ -161,7 +162,7 @@ func (c *Config) POSTFILE(httpUrl string, param map[string]string, file []byte) 
 	return respBody
 }
 
-func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header) {
+func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header,int) {
 
 	var jsonStr = []byte(params)
 	transCfg := &http.Transport{
@@ -170,19 +171,19 @@ func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header) {
 	client := &http.Client{Transport: transCfg}
 	req, _ := http.NewRequest("POST", httpUrl, bytes.NewBuffer(jsonStr))
 	//  组装http请求头
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", ApplicationJson)
 	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print(err)
-		return nil, nil
+		return nil, nil,0
 	}
 	defer resp.Body.Close()
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	respHeader := resp.Header
-	return respBody, respHeader
+	return respBody, respHeader,resp.StatusCode
 }
 func (c *Config) DELETE(httpUrl string, param map[string]string) ([]byte, int, error) {
 	var data = url.Values{}

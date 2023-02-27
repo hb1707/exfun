@@ -19,7 +19,14 @@ func IntChecked(selectInt int, sumInt int) bool {
 	return selectInt&sumInt == selectInt
 }
 
-//RandInt 生成指定位数的随机数
-func RandInt(n int) int {
-	return int(rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(int32(10 * n)))
+//RandInt 生成指定位的随机整数
+func RandInt(n int64) int64 {
+	rand.Seed(time.Now().UnixNano())
+	var letters = []rune("0123456789")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	result, _ := strconv.ParseInt(string(b), 10, 64)
+	return result
 }

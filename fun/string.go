@@ -206,3 +206,9 @@ func ChunkSplit(body string, chunklen uint, end string) string {
 	}
 	return string(ns)
 }
+
+//FilterNumber 过滤字符串中的数字
+func FilterNumber(str string) string {
+	reg := regexp.MustCompile(`\D+`)
+	return reg.ReplaceAllString(str, "")
+}
