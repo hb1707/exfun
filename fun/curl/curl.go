@@ -17,8 +17,8 @@ const ApplicationFile = "multipart/form-data"
 const ApplicationXml = "application/xml;charset=utf-8"
 const ApplicationForm = "application/x-www-form-urlencoded;charset=utf-8"
 const ApplicationOctetStream = "application/octet-stream;charset=UTF-8"
-const TlsTimeout = time.Duration(20 * time.Second)
-const HttpTimeout = time.Duration(35 * time.Second)
+const TlsTimeout = time.Duration(60 * time.Second)
+const HttpTimeout = time.Duration(90 * time.Second)
 
 type Config struct {
 	Headers map[string]string
@@ -81,6 +81,7 @@ func (c Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
 		log.Println(err)
 		return nil, 0, err
 	}
+	c.Headers["Content-Length"] = fmt.Sprintf("%d", len(reqBody))
 	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
@@ -166,9 +167,10 @@ func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header,in
 
 	var jsonStr = []byte(params)
 	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // disable verify
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},// disable verify
+		TLSHandshakeTimeout: TlsTimeout,
 	}
-	client := &http.Client{Transport: transCfg}
+	client := &http.Client{Transport: transCfg,Timeout: HttpTimeout}
 	req, _ := http.NewRequest("POST", httpUrl, bytes.NewBuffer(jsonStr))
 	//  组装http请求头
 	req.Header.Set("Content-Type", ApplicationJson)
