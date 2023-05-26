@@ -11,14 +11,18 @@ import (
 func ClearTags(str string) string {
 	str = StripTags(str)
 	//去除换行及其他特殊字符
-	re, _ := regexp.Compile(`(\r|\n)`)
+	re, _ := regexp.Compile(`(\r|\n|\t)`)
 	str = re.ReplaceAllString(str, "")
 	str = strings.Trim(str, " ")
 	return str
 }
 
 // IsChineseAndEnglish 判断是否只有中英文和_
-func IsChineseAndEnglish(str string) bool {
+func IsChineseAndEnglish(str string,dot bool) bool {
+	if dot {
+		matched, _ := regexp.MatchString("^[_0-9a-zA-Z\u4e00-\u9fa5.]+$", str)
+		return matched
+	}
 	matched, _ := regexp.MatchString("^[_0-9a-zA-Z\u4e00-\u9fa5]+$", str)
 	return matched
 }
