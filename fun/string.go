@@ -18,7 +18,7 @@ func ClearTags(str string) string {
 }
 
 // IsChineseAndEnglish 判断是否只有中英文和_
-func IsChineseAndEnglish(str string,dot bool) bool {
+func IsChineseAndEnglish(str string, dot bool) bool {
 	if dot {
 		matched, _ := regexp.MatchString("^[_0-9a-zA-Z\u4e00-\u9fa5.]+$", str)
 		return matched
@@ -164,6 +164,10 @@ func PregMatch(pattern string, subject string, matches *[]string) bool {
 	}
 }
 
+//PregReplace 正则替换
+//arr 正则表达式数组
+//repl 替换的内容，可以是字符串，也可以是字符串数组
+//src 要替换的字符串
 func PregReplace(arr []string, repl interface{}, src string) string {
 	for i, s := range arr {
 		if value, ok := repl.(string); ok {
