@@ -43,6 +43,9 @@ func (c *Config) SetHeader(k, v string) {
 	c.Headers[k] = v
 }
 func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, error) {
+	if httpUrl == "" {
+		return nil, 0, fmt.Errorf("httpUrl is empty")
+	}
 	var data = url.Values{}
 	for k, v := range param {
 		data.Add(k, fmt.Sprintf("%v", v))
@@ -67,7 +70,9 @@ func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, erro
 	return respBody, resp.StatusCode, nil
 }
 func (c Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
-
+	if httpUrl == "" {
+		return nil, 0, fmt.Errorf("httpUrl is empty")
+	}
 	transport := &http.Transport{
 		TLSHandshakeTimeout: TlsTimeout,
 		DisableKeepAlives:   true,
@@ -100,7 +105,9 @@ func (c Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
 	return respBody, resp.StatusCode, nil
 }
 func (c Config) PUT(httpUrl string, reqBody []byte) ([]byte, int, error) {
-
+	if httpUrl == "" {
+		return nil, 0, fmt.Errorf("httpUrl is empty")
+	}
 	transport := &http.Transport{
 		TLSHandshakeTimeout: TlsTimeout,
 		DisableKeepAlives:   true,
@@ -133,7 +140,9 @@ func (c Config) PUT(httpUrl string, reqBody []byte) ([]byte, int, error) {
 }
 
 func (c *Config) POSTFILE(httpUrl string, param map[string]string, file []byte) []byte {
-
+	if httpUrl == "" {
+		return nil
+	}
 	//  待合成文本
 	var data = url.Values{}
 	for k, v := range param {
@@ -163,14 +172,16 @@ func (c *Config) POSTFILE(httpUrl string, param map[string]string, file []byte) 
 	return respBody
 }
 
-func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header,int) {
-
+func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header, int) {
+	if httpUrl == "" {
+		return nil, nil, 0
+	}
 	var jsonStr = []byte(params)
 	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},// disable verify
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, // disable verify
 		TLSHandshakeTimeout: TlsTimeout,
 	}
-	client := &http.Client{Transport: transCfg,Timeout: HttpTimeout}
+	client := &http.Client{Transport: transCfg, Timeout: HttpTimeout}
 	req, _ := http.NewRequest("POST", httpUrl, bytes.NewBuffer(jsonStr))
 	//  组装http请求头
 	req.Header.Set("Content-Type", ApplicationJson)
@@ -180,14 +191,17 @@ func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header,in
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print(err)
-		return nil, nil,0
+		return nil, nil, 0
 	}
 	defer resp.Body.Close()
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	respHeader := resp.Header
-	return respBody, respHeader,resp.StatusCode
+	return respBody, respHeader, resp.StatusCode
 }
 func (c *Config) DELETE(httpUrl string, param map[string]string) ([]byte, int, error) {
+	if httpUrl == "" {
+		return nil, 0, fmt.Errorf("httpUrl is empty")
+	}
 	var data = url.Values{}
 	for k, v := range param {
 		data.Add(k, v)
