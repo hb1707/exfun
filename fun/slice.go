@@ -1,21 +1,21 @@
 package fun
 
-// ClearZeroSliceInt 去除slice的0值
-func ClearZeroSliceInt(slice []int) []int {
-	var newSlice = make([]int, 0, 0)
+// ClearSliceInt 去除slice的0值
+func ClearSliceInt(slice []int,clearVal int) []int {
+	var newSlice = make([]int, 0)
 	for _, v := range slice {
-		if v > 0 {
+		if v !=  clearVal {
 			newSlice = append(newSlice, v)
 		}
 	}
 	return newSlice
 }
 
-// ClearEmptySliceString 去除slice的0值
-func ClearEmptySliceString(slice []string) []string {
-	var newSlice = make([]string, 0, 0)
+// ClearSliceString 去除slice的""值
+func ClearSliceString(slice []string,clearVal string) []string {
+	var newSlice = make([]string, 0)
 	for _, v := range slice {
-		if v != "" {
+		if v != clearVal {
 			newSlice = append(newSlice, v)
 		}
 	}
@@ -45,6 +45,15 @@ func InSliceString(value string, slice []string) bool {
 	}
 	return false
 }
+func InSliceAny(value any, slice []any) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
 
 // SliceUniqueString String切片去重
 func SliceUniqueString(value []string) []string {

@@ -5,7 +5,14 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"strconv"
 )
+// Str2Int 字符串转换为整数
+func Str2Int(str string) int {
+	i, _ := strconv.Atoi(str)
+	return i
+}
+
 
 // ClearTags 清除代码
 func ClearTags(str string) string {
@@ -24,6 +31,16 @@ func IsChineseAndEnglish(str string, dot bool) bool {
 		return matched
 	}
 	matched, _ := regexp.MatchString("^[_0-9a-zA-Z\u4e00-\u9fa5]+$", str)
+	return matched
+}
+
+// IsEnglish 判断是否只有英文和_
+func IsEnglish(str string, dot bool) bool {
+	if dot {
+		matched, _ := regexp.MatchString("^[_0-9a-zA-Z.]+$", str)
+		return matched
+	}
+	matched, _ := regexp.MatchString("^[_0-9a-zA-Z]+$", str)
 	return matched
 }
 
@@ -111,22 +128,22 @@ func Stripslashes(str string) string {
 	return string(dstRune)
 }
 
-//stripos 查找字符串在另一字符串中第一次出现的位置（不区分大小写）
+//Stripos 查找字符串在另一字符串中第一次出现的位置（不区分大小写）
 func Stripos(str string, index string) int {
 	return strings.Index(strings.ToLower(str), strings.ToLower(index))
 }
 
-//strpos 查找字符串在另一字符串中第一次出现的位置（区分大小写）
+//Strpos 查找字符串在另一字符串中第一次出现的位置（区分大小写）
 func Strpos(str string, index string) int {
 	return strings.Index(str, index)
 }
 
-//strripos 查找字符串在另一字符串中最后一次出现的位置（不区分大小写）
+//Strripos 查找字符串在另一字符串中最后一次出现的位置（不区分大小写）
 func Strripos(str string, index string) int {
 	return strings.LastIndex(strings.ToLower(str), strings.ToLower(index))
 }
 
-//strrpos 查找字符串在另一字符串中最后一次出现的位置（区分大小写）
+//Strrpos 查找字符串在另一字符串中最后一次出现的位置（区分大小写）
 func Strrpos(str string, index string) int {
 	return strings.LastIndex(str, index)
 }
@@ -152,6 +169,9 @@ func PregMatchAll(pattern string, subject string, matches *[][]string) bool {
 }
 
 func PregMatch(pattern string, subject string, matches *[]string) bool {
+	if matches == nil {
+		return false
+	}
 	data := regexp.MustCompile(pattern).FindStringSubmatch(subject)
 	for _, match := range data {
 		*matches = append(*matches, match)
@@ -175,12 +195,11 @@ func PregReplace(arr []string, repl interface{}, src string) string {
 		} else if value, ok := repl.([]string); ok {
 			src = regexp.MustCompile(s).ReplaceAllString(src, value[i])
 		}
-
 	}
 	return src
 }
 
-func HideString(str string, starNum int) string {
+func HideString(str string, starNum int,starStr ...string) string {
 	hLen := len([]rune(str))
 	min := int(math.Floor(float64(hLen) / 3))
 	if starNum > 0 {
@@ -188,6 +207,10 @@ func HideString(str string, starNum int) string {
 	}
 	star := hLen - (min * 2)
 	re, _ := regexp.Compile(fmt.Sprintf("(.{%v}?)(.{%v}?)(.+?)", min, star))
+	if len(starStr) > 0 {
+		newStr := re.ReplaceAllString(str, fmt.Sprintf("$1%v$3", starStr[0]))
+		return newStr
+	}
 	newStr := re.ReplaceAllString(str, "$1****$3")
 	return newStr
 }
@@ -215,8 +238,26 @@ func ChunkSplit(body string, chunklen uint, end string) string {
 	return string(ns)
 }
 
-//FilterNumber 过滤字符串中的数字
+//FilterNumber 过滤掉字符串中的数字
 func FilterNumber(str string) string {
+	reg := regexp.MustCompile(`\d+`)
+	return reg.ReplaceAllString(str, "")
+}
+//FilterNoNumber 过滤掉字符串中的非数字
+func FilterNoNumber(str string) string {
 	reg := regexp.MustCompile(`\D+`)
 	return reg.ReplaceAllString(str, "")
+}
+
+func Price(price float64, decimals int) string {
+	var priceStr = fmt.Sprintf("%."+fmt.Sprintf("%d", decimals)+"f", price)
+ if strings.Contains(priceStr, "."+strings.Repeat("0", decimals)) {
+	 return fmt.Sprintf("%.0f", price)
+ }else {
+	 return priceStr
+ }
+}
+//中文字数
+func StrLen(str string) int {
+	return len([]rune(str))
 }

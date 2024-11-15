@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -23,6 +24,9 @@ const HttpTimeout = time.Duration(90 * time.Second)
 type Config struct {
 	Headers map[string]string
 }
+
+var IsDebug = make(map[string]bool, 0)
+var DebugList = make(map[string][]string, 0)
 
 var defaultConfig = &Config{
 	Headers: map[string]string{"Content-Type": ApplicationJson},
@@ -168,7 +172,6 @@ func (c *Config) POSTFILE(httpUrl string, param map[string]string, file []byte) 
 	}
 	defer resp.Body.Close()
 	respBody, _ := ioutil.ReadAll(resp.Body)
-
 	return respBody
 }
 
@@ -196,6 +199,7 @@ func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header, i
 	defer resp.Body.Close()
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	respHeader := resp.Header
+	c.AddDebug(req, httpUrl, params, respBody)
 	return respBody, respHeader, resp.StatusCode
 }
 func (c *Config) DELETE(httpUrl string, param map[string]string) ([]byte, int, error) {
@@ -224,4 +228,85 @@ func (c *Config) DELETE(httpUrl string, param map[string]string) ([]byte, int, e
 	defer resp.Body.Close()
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	return respBody, resp.StatusCode, nil
+}
+func (c *Config) AddDebug(req *http.Request, httpUrl string, jsonStr []byte, respBody []byte) {
+	if ok, exist := IsDebug[httpUrl]; exist && ok {
+		header := ""
+		for s, strings := range req.Header {
+			header += fmt.Sprintf("%s:%s\n", s, strings)
+		}
+		if DebugList[httpUrl] == nil {
+			DebugList[httpUrl] = make([]string, 0)
+		}
+		DebugList[httpUrl] = append([]string{fmt.Sprintf("POSTJSON: \n\nAPI:%s\n\nRequest:%s\n\nBody:%s", httpUrl, string(jsonStr), string(respBody))}, DebugList[httpUrl]...)
+		if len(DebugList[httpUrl]) > 20 {
+			DebugList[httpUrl] = DebugList[httpUrl][:20]
+		}
+	}
+}
+
+func (c *Config) POSTSEE(httpUrl string, params []byte, callback func([]byte)) int {
+	if httpUrl == "" {
+		return 0
+	}
+	var jsonStr = []byte(params)
+	transCfg := &http.Transport{
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, // disable verify
+		TLSHandshakeTimeout: TlsTimeout,
+	}
+	client := &http.Client{Transport: transCfg, Timeout: HttpTimeout}
+	req, _ := http.NewRequest("POST", httpUrl, bytes.NewBuffer(jsonStr))
+	//  组装http请求头
+	req.Header.Set("Content-Type", ApplicationJson)
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Connection", "keep-alive")
+	for k, v := range c.Headers {
+		req.Header.Set(k, v)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Print(err)
+		return resp.StatusCode
+	}
+	defer resp.Body.Close()
+	for {
+		data := make([]byte, 1024)
+		_, err := resp.Body.Read(data)
+		if err != nil {
+			return resp.StatusCode
+		}
+		if string(data) == "" || data == nil {
+			break
+		}
+		callback(data)
+	}
+	return resp.StatusCode
+}
+
+func (c *Config) GETHtml(httpUrl string, param map[string]string) (io.ReadCloser, int, error) {
+	if httpUrl == "" {
+		return nil, 0, fmt.Errorf("httpUrl is empty")
+	}
+	var data = url.Values{}
+	for k, v := range param {
+		data.Add(k, fmt.Sprintf("%v", v))
+	}
+	reqBody := data.Encode()
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", httpUrl+"?"+reqBody, nil)
+	if err != nil {
+		log.Println(err)
+		return nil, 0, err
+	}
+	for k, v := range c.Headers {
+		req.Header.Set(k, v)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Print(err)
+		return nil, 0, err
+	}
+	defer resp.Body.Close()
+	return resp.Body, resp.StatusCode, nil
 }

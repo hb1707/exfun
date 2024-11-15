@@ -182,32 +182,42 @@ func Decrypt(textByte []byte, key string) string {
 }
 
 // AesEncrypt AES加密
-func AesEncrypt(orig, key string) string {
+func AesEncrypt(orig, keyStr string) string {
 	//key, err := base64.StdEncoding.DecodeString(keyStr)
+	key := []byte(keyStr)
 	origData := []byte(orig)
-	k := []byte(key)
-
-	block, err := aes.NewCipher(k)
+	//k := []byte(key)
+	//iv := make([]byte, aes.BlockSize)
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return ""
 	}
 	blockSize := block.BlockSize()
+	if len(key) < blockSize {
+		return ""
+	}
 	origData = PKCS5Padding(origData, blockSize)
-	blockMode := cipher.NewCBCEncrypter(block, k[:blockSize])
+	blockMode := cipher.NewCBCEncrypter(block, key[:blockSize])
 	crypted := make([]byte, len(origData))
 	blockMode.CryptBlocks(crypted, origData)
 	return base64.StdEncoding.EncodeToString(crypted)
 }
 
 // AesDecrypt AES解密
-func AesDecrypt(crypto, key string) string {
+func AesDecrypt(crypto, keyStr string) string {
+	//key, err := base64.StdEncoding.DecodeString(keyStr)
+	key := keyStr
 	cryptoByte, _ := base64.StdEncoding.DecodeString(crypto)
+	//iv := make([]byte, aes.BlockSize)
 	k := []byte(key)
 	block, err := aes.NewCipher(k)
 	if err != nil {
 		return ""
 	}
 	blockSize := block.BlockSize()
+	if len(key) < blockSize {
+		return ""
+	}
 	blockMode := cipher.NewCBCDecrypter(block, k[:blockSize])
 	origData := make([]byte, len(cryptoByte))
 	blockMode.CryptBlocks(origData, cryptoByte)

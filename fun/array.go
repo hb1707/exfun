@@ -105,14 +105,24 @@ func Struct2Url(obj interface{}, tag string, isEnc bool) string {
 						continue
 					} else if v.Field(i).Kind() == reflect.Interface && v.Field(i).IsNil() {
 						continue
+					} else if v.Field(i).Kind() == reflect.Struct && v.Field(i).IsNil() {
+						continue
 					}
 				}
-				if isEnc {
-					data += "&" + tagArr[0] + "=" + UrlEncode(fmt.Sprintf("%v", v.Field(i).Interface()))
-				} else {
-					data += "&" + tagArr[0] + "=" + fmt.Sprintf("%v", v.Field(i).Interface())
-				}
+				if v.Field(i).Kind() == reflect.Struct {
+					st :=  Struct2Url(v.Field(i).Interface(), tag, isEnc)
+					if st != "" {
+						st = strings.ReplaceAll(st, "&", "&"+tagArr[0]+".")
+						data += "&"+tagArr[0]+"."+st
+					}
 
+				}else {
+					if isEnc {
+						data += "&" + tagArr[0] + "=" + UrlEncode(fmt.Sprintf("%v", v.Field(i).Interface()))
+					} else {
+						data += "&" + tagArr[0] + "=" + fmt.Sprintf("%v", v.Field(i).Interface())
+					}
+				}
 			} else {
 				if isEnc {
 					data += "&" + t.Field(i).Name + "=" + UrlEncode(fmt.Sprintf("%v", v.Field(i).Interface()))

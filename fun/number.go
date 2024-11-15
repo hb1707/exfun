@@ -30,3 +30,12 @@ func RandInt(n int64) int64 {
 	result, _ := strconv.ParseInt(string(b), 10, 64)
 	return result
 }
+
+//Percent 计算2个数的比率
+func Percent(num1, num2 int) float64 {
+	return Round(float64(num1)/float64(num2), 2)
+}
+//PercentFloat64 计算2个数的比率
+func PercentFloat64(num1, num2 float64) float64 {
+	return Round(num1/num2, 2)
+}
