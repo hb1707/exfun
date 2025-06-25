@@ -141,7 +141,7 @@ const (
 )
 
 // RandString https://www.flysnow.org/2019/09/30/how-to-generate-a-random-string-of-a-fixed-length-in-go.html
-//生成随机字母字符串
+// 生成随机字母字符串
 func RandString(n int) string {
 	var b = make([]byte, n)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
@@ -232,6 +232,9 @@ func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
 }
 func PKCS5UnPadding(origData []byte) []byte {
 	length := len(origData)
+	if length == 0 {
+		return origData
+	}
 	unpadding := int(origData[length-1])
 	return origData[:(length - unpadding)]
 }
