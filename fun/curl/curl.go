@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -51,14 +50,21 @@ func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, erro
 	if httpUrl == "" {
 		return nil, 0, fmt.Errorf("httpUrl is empty")
 	}
-	// 从httpUrl中获取参数
-	var data, _ = url.ParseQuery(httpUrl)
+	var data = url.Values{}
+	httpUrlArr := strings.Split(httpUrl, "?")
+	if len(httpUrlArr) > 1 {
+		httpUrl = httpUrlArr[0]
+		paramStr := httpUrlArr[1]
+		data, _ = url.ParseQuery(paramStr)
+	} else if len(httpUrlArr) == 1 {
+		httpUrl = httpUrlArr[0]
+	}
 	for k, v := range param {
 		data.Add(k, fmt.Sprintf("%v", v))
 	}
 	reqBody := data.Encode()
 	client := &http.Client{}
-	httpUrl = strings.Split(httpUrl, "?")[0] // 确保httpUrl不包含参数
+	httpUrl = strings.Split(httpUrl, "?")[0]
 	req, err := http.NewRequest("GET", httpUrl+"?"+reqBody, nil)
 	if err != nil {
 		log.Println(err)
@@ -73,7 +79,7 @@ func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, erro
 		return nil, 0, err
 	}
 	defer resp.Body.Close()
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(resp.Body)
 	return respBody, resp.StatusCode, nil
 }
 func (c *Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
@@ -105,7 +111,7 @@ func (c *Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
 	}
 	//core.Print("%+v",resp.Body)
 	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -139,7 +145,7 @@ func (c *Config) PUT(httpUrl string, reqBody []byte) ([]byte, int, error) {
 	}
 	//core.Print("%+v",resp.Body)
 	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -174,7 +180,7 @@ func (c *Config) POSTFILE(httpUrl string, param map[string]string, file []byte) 
 		return nil
 	}
 	defer resp.Body.Close()
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(resp.Body)
 	return respBody
 }
 
@@ -200,7 +206,7 @@ func (c *Config) POSTJSON(httpUrl string, params []byte) ([]byte, http.Header, i
 		return nil, nil, 0
 	}
 	defer resp.Body.Close()
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(resp.Body)
 	respHeader := resp.Header
 	c.AddDebug(req, httpUrl, params, respBody)
 	return respBody, respHeader, resp.StatusCode
@@ -229,7 +235,7 @@ func (c *Config) DELETE(httpUrl string, param map[string]string) ([]byte, int, e
 		return nil, 0, err
 	}
 	defer resp.Body.Close()
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(resp.Body)
 	return respBody, resp.StatusCode, nil
 }
 func (c *Config) AddDebug(req *http.Request, httpUrl string, jsonStr []byte, respBody []byte) {
