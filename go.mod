@@ -1,3 +1,3 @@
 module github.com/hb1707/exfun
 
-go 1.19
+go 1.24
