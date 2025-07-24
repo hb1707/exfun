@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -50,12 +51,14 @@ func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, erro
 	if httpUrl == "" {
 		return nil, 0, fmt.Errorf("httpUrl is empty")
 	}
-	var data = url.Values{}
+	// 从httpUrl中获取参数
+	var data, _ = url.ParseQuery(httpUrl)
 	for k, v := range param {
 		data.Add(k, fmt.Sprintf("%v", v))
 	}
 	reqBody := data.Encode()
 	client := &http.Client{}
+	httpUrl = strings.Split(httpUrl, "?")[0] // 确保httpUrl不包含参数
 	req, err := http.NewRequest("GET", httpUrl+"?"+reqBody, nil)
 	if err != nil {
 		log.Println(err)
@@ -73,7 +76,7 @@ func (c *Config) GET(httpUrl string, param map[string]string) ([]byte, int, erro
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	return respBody, resp.StatusCode, nil
 }
-func (c Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
+func (c *Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
 	if httpUrl == "" {
 		return nil, 0, fmt.Errorf("httpUrl is empty")
 	}
@@ -108,7 +111,7 @@ func (c Config) POST(httpUrl string, reqBody []byte) ([]byte, int, error) {
 	}
 	return respBody, resp.StatusCode, nil
 }
-func (c Config) PUT(httpUrl string, reqBody []byte) ([]byte, int, error) {
+func (c *Config) PUT(httpUrl string, reqBody []byte) ([]byte, int, error) {
 	if httpUrl == "" {
 		return nil, 0, fmt.Errorf("httpUrl is empty")
 	}
