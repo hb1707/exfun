@@ -65,7 +65,7 @@ func Domain(url string, suffix string) string {
 		// 处理子域名情况，例如: sub.example.com
 		// 对于某些特殊的二级域名，如 co.uk, com.cn 等，这里需要额外处理
 		// 这里给出一个简化实现
-		if strings.HasSuffix(url, suffix) {
+		if strings.HasSuffix(url, suffix) && suffix != "" {
 			// 对于特殊二级域名，返回最后三段
 			return parts[partsLen-3] + "." + parts[partsLen-2] + "." + parts[partsLen-1]
 		}
